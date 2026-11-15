@@ -23,8 +23,8 @@ header h1{margin:0;font-size:1.2rem;font-weight:600;flex:1}
 main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media(min-width:640px){main{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}}
 .card{background:var(--card);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;border:2px solid var(--line)}
-.ph{position:relative;aspect-ratio:1;background:var(--line)}
-.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph{position:relative;aspect-ratio:3/4;background:#f1f1f3}
+.ph img{width:100%;height:100%;object-fit:contain;display:block}
 .tag{position:absolute;top:8px;left:8px;background:var(--sun);color:#2a2540;font-weight:600;padding:1px 9px;border-radius:99px;font-size:.8rem}
 .tag.out{background:var(--ink);color:var(--bg);left:auto;right:8px}
 .info{padding:10px;display:flex;flex-direction:column;gap:2px;flex:1}
