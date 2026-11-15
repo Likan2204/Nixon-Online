@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi tienda de amigurumis y peluches</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f1fb;--card:#fff;--ink:#2a2540;--muted:#6e6a85;--pink:#ff5c8a;--mint:#2fae8c;--sun:#ffd54a;--line:#e2def2}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1930;--card:#27233f;--ink:#f1eefc;--muted:#a9a4c4;--line:#3a3560}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Fredoka,system-ui,sans-serif;line-height:1.45}
+button{font:inherit;cursor:pointer;border:0;color:inherit}
+input,select{font:inherit;color:var(--ink)}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+header{position:sticky;top:0;z-index:4;background:var(--bg);padding:10px 4vw;display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--line)}
+header h1{margin:0;font-size:1.2rem;font-weight:600;flex:1}
+.ib{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:500}
+.cartbtn{background:var(--pink);color:#fff;border-color:var(--pink)}
+.tools{padding:12px 4vw 4px;display:grid;grid-template-columns:1fr auto;gap:8px}
+.tools input,.tools select{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:9px 12px;min-width:0}
+.crumb{padding:6px 4vw;color:var(--muted);font-size:.9rem}
+main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:640px){main{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}}
+.card{background:var(--card);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;border:2px solid var(--line)}
+.ph{position:relative;aspect-ratio:1;background:var(--line)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.tag{position:absolute;top:8px;left:8px;background:var(--sun);color:#2a2540;font-weight:600;padding:1px 9px;border-radius:99px;font-size:.8rem}
+.tag.out{background:var(--ink);color:var(--bg);left:auto;right:8px}
+.info{padding:10px;display:flex;flex-direction:column;gap:2px;flex:1}
+.info h3{margin:0;font-size:.95rem;font-weight:500}
+.cat{color:var(--muted);font-size:.78rem}
+.price{font-size:1.1rem;font-weight:600}
+.price s{color:var(--muted);font-weight:400;font-size:.85rem;margin-right:5px}
+.price b{color:var(--pink)}
+.stock{font-size:.8rem;color:var(--mint)}
+.stock.low{color:#d9822b}
+.add{margin-top:6px;background:var(--pink);color:#fff;padding:9px;border-radius:12px;font-weight:500}
+.add:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
+.drawer{position:fixed;top:0;height:100%;width:min(360px,92%);background:var(--card);z-index:6;padding:18px;display:flex;flex-direction:column;gap:10px;transition:transform .25s;overflow:auto}
+#menu{left:0;transform:translateX(-105%);box-shadow:8px 0 30px rgba(0,0,0,.25)}
+#cart{right:0;transform:translateX(105%);box-shadow:-8px 0 30px rgba(0,0,0,.25)}
+.drawer.open{transform:none}
+.veil{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:5;display:none}
+.veil.on{display:block}
+.drawer h2{margin:0}
+.cbtn{display:block;width:100%;text-align:left;background:none;padding:10px 4px;font-weight:500;border-bottom:1px solid var(--line)}
+.sbtn{display:block;width:100%;text-align:left;background:none;padding:7px 4px 7px 18px;color:var(--muted)}
+.cbtn.on,.sbtn.on{color:var(--pink)}
+#items{flex:1}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
+.row small{color:var(--muted)}
+.qty{white-space:nowrap}
+.qty button{background:var(--line);width:28px;height:28px;border-radius:50%}
+.tot{border-top:2px solid var(--line);padding-top:8px}
+.tot div{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.tot s{color:var(--muted)}
+.tot .final{font-size:1.4rem;font-weight:600;color:var(--pink)}
+.save{color:var(--mint);font-size:.9rem}
+.note{font-size:.82rem;color:var(--muted);background:var(--bg);padding:8px 10px;border-radius:10px}
+.buy{background:var(--mint);color:#fff;padding:13px;border-radius:14px;font-weight:600}
+.msg{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0}
+@media (prefers-reduced-motion:reduce){.drawer{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <button class="ib" id="openMenu" aria-label="Menú de categorías">☰</button>
+  <h1>🧶 Mi tienda</h1>
+  <button class="ib cartbtn" id="openCart">Carrito (<span id="count">0</span>)</button>
+</header>
+<div class="tools">
+  <input id="q" type="search" placeholder="Buscar por nombre…" aria-label="Buscar">
+  <select id="sort" aria-label="Ordenar">
+    <option value="new">Más nuevos</option>
+    <option value="asc">Precio: menor a mayor</option>
+    <option value="desc">Precio: mayor a menor</option>
+  </select>
+</div>
+<div class="crumb" id="crumb"></div>
+<main id="grid"><p class="msg">Cargando productos…</p></main>
+
+<div class="veil" id="veil"></div>
+<nav class="drawer" id="menu" aria-label="Categorías"></nav>
+<aside class="drawer" id="cart" aria-label="Carrito">
+  <h2>Tu pedido</h2>
+  <div id="items"></div>
+  <div class="tot">
+    <div><span>Total sin descuento</span><s>$<span id="tFull">0</span></s></div>
+    <div class="save" id="saveRow"></div>
+    <div><span>Total con descuento</span><span class="final">$<span id="tFinal">0</span></span></div>
+  </div>
+  <p class="note">Retiro: gratis. Punto de encuentro, envío por correo o Uber moto tienen costo extra y lo coordinamos por WhatsApp.</p>
+  <button class="buy" id="buy">Enviar pedido por WhatsApp</button>
+  <button class="ib" id="closeCart">Seguir mirando</button>
+</aside>
+
+<script>
+// ====== CONFIGURÁ ESTO ======
+const SUPABASE_URL = "https://vstwmjyqjoncxyfwpgdf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_WOxE5t2jMgo6hYHScxjzow_yAKJouv8"; // publishable key
+const WHATSAPP = "5491158824511";
+// ============================
+
+const DEMO = [
+ {id:1,name:"Llavero amigurumi pollito",category:"Amigurumis",subcategory:"Llaveros",price:6000,sale_price:null,stock:5},
+ {id:2,name:"Peluche Pikachu 25cm",category:"Peluches",subcategory:"Pokémon",price:18000,sale_price:15000,stock:2},
+ {id:3,name:"Llavero goma Hello Kitty",category:"Llaveros",subcategory:"Sanrio",price:3500,sale_price:null,stock:0},
+ {id:4,name:"Peluche zorrito",category:"Peluches",subcategory:"Animales",price:14000,sale_price:null,stock:8},
+ {id:5,name:"Amigurumi osito",category:"Amigurumis",subcategory:"Peluches",price:12000,sale_price:9500,stock:3}
+];
+const $ = s => document.querySelector(s);
+const money = n => "$" + Math.round(n).toLocaleString("es-AR");
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const now = p => p.sale_price ? +p.sale_price : +p.price;
+let products=[], cart={}, cat="", sub="";
+try{cart=JSON.parse(sessionStorage.getItem("cart")||"{}")}catch(e){}
+
+async function load(){
+  if(!SUPABASE_URL){products=DEMO;return}
+  try{
+    const r=await fetch(SUPABASE_URL+"/rest/v1/products?active=eq.true&order=created_at.desc",
+      {headers:SUPABASE_KEY.startsWith("eyJ")?{apikey:SUPABASE_KEY,Authorization:"Bearer "+SUPABASE_KEY}:{apikey:SUPABASE_KEY}});
+    if(!r.ok)throw 0;
+    products=await r.json();
+  }catch(e){products=null;$("#grid").innerHTML='<p class="msg">No se pudieron cargar los productos. Probá de nuevo en un rato.</p>'}
+}
+
+function renderMenu(){
+  const tree={};
+  products.forEach(p=>{if(p.category){(tree[p.category]??=new Set());if(p.subcategory)tree[p.category].add(p.subcategory)}});
+  let h='<h2>Categorías</h2><button class="cbtn '+(!cat?'on':'')+'" data-c="">Todo</button>';
+  Object.keys(tree).forEach(c=>{
+    h+=`<button class="cbtn ${cat===c&&!sub?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`;
+    [...tree[c]].forEach(s=>h+=`<button class="sbtn ${cat===c&&sub===s?'on':''}" data-c="${esc(c)}" data-s="${esc(s)}">${esc(s)}</button>`);
+  });
+  $("#menu").innerHTML=h;
+}
+
+function render(){
+  if(!products)return;
+  const q=$("#q").value.trim().toLowerCase(), so=$("#sort").value;
+  let list=products.filter(p=>(!cat||p.category===cat)&&(!sub||p.subcategory===sub)&&(!q||p.name.toLowerCase().includes(q)));
+  if(so==="asc")list.sort((a,b)=>now(a)-now(b));
+  if(so==="desc")list.sort((a,b)=>now(b)-now(a));
+  $("#crumb").textContent=[cat||"Todo",sub].filter(Boolean).join(" › ")+" ("+list.length+")";
+  $("#grid").innerHTML=list.length?list.map(p=>{
+    const out=p.stock<=0, off=p.sale_price?Math.round(100-p.sale_price*100/p.price):0;
+    return `<article class="card">
+      <div class="ph">${p.image_url?`<img loading="lazy" src="${esc(p.image_url)}" alt="${esc(p.name)}">`:""}
+        ${off?`<span class="tag">-${off}%</span>`:""}${out?`<span class="tag out">Agotado</span>`:""}</div>
+      <div class="info"><span class="cat">${esc(p.subcategory||p.category)}</span><h3>${esc(p.name)}</h3>
+        <div class="price">${p.sale_price?`<s>${money(p.price)}</s><b>${money(p.sale_price)}</b>`:money(p.price)}</div>
+        <span class="stock ${p.stock<=3?"low":""}">${out?"Sin stock":p.stock<=3?`¡Quedan ${p.stock}!`:`${p.stock} disponibles`}</span>
+        <button class="add" data-id="${p.id}" ${out?"disabled":""}>Agregar</button></div></article>`;
+  }).join(""):'<p class="msg">No encontramos productos con esos filtros.</p>';
+}
+
+function renderCart(){
+  const ids=Object.keys(cart).filter(id=>products&&products.find(p=>p.id==id));
+  let full=0,fin=0,n=0;
+  $("#items").innerHTML=ids.length?ids.map(id=>{
+    const p=products.find(p=>p.id==id),q=cart[id];
+    full+=p.price*q;fin+=now(p)*q;n+=q;
+    return `<div class="row"><div>${esc(p.name)}<br><small>${p.sale_price?`<s>${money(p.price)}</s> `:""}${money(now(p))} c/u</small></div>
+      <div class="qty"><button data-m="${id}" aria-label="Quitar uno">−</button> ${q} <button data-p="${id}" aria-label="Agregar uno">+</button></div></div>`;
+  }).join(""):'<p class="msg">Tu carrito está vacío.</p>';
+  $("#tFull").textContent=Math.round(full).toLocaleString("es-AR");
+  $("#tFinal").textContent=Math.round(fin).toLocaleString("es-AR");
+  $("#saveRow").textContent=full>fin?"Ahorrás "+money(full-fin):"";
+  $("#count").textContent=n;
+  try{sessionStorage.setItem("cart",JSON.stringify(cart))}catch(e){}
+}
+function change(id,d){
+  const p=products.find(p=>p.id==id);if(!p)return;
+  const q=(cart[id]||0)+d;
+  if(q<=0)delete cart[id];else if(q<=p.stock)cart[id]=q;
+  renderCart();
+}
+const toggle=(id,on)=>{$("#"+id).classList.toggle("open",on);$("#veil").classList.toggle("on",on)};
+const closeAll=()=>{["menu","cart"].forEach(i=>$("#"+i).classList.remove("open"));$("#veil").classList.remove("on")};
+
+document.addEventListener("click",e=>{
+  const t=e.target;
+  if(t.dataset.c!==undefined&&t.closest("#menu")){cat=t.dataset.c;sub=t.dataset.s||"";renderMenu();render();closeAll()}
+  if(t.classList.contains("add")){change(t.dataset.id,1);toggle("cart",true)}
+  if(t.dataset.p)change(t.dataset.p,1);
+  if(t.dataset.m)change(t.dataset.m,-1);
+});
+$("#openMenu").onclick=()=>toggle("menu",true);
+$("#openCart").onclick=()=>toggle("cart",true);
+$("#closeCart").onclick=closeAll;
+$("#veil").onclick=closeAll;
+$("#q").oninput=render;
+$("#sort").onchange=render;
+$("#buy").onclick=()=>{
+  const ids=Object.keys(cart).filter(id=>products.find(p=>p.id==id));
+  if(!ids.length)return;
+  let full=0,fin=0,t="¡Hola! Quiero hacer este pedido:\n\n";
+  ids.forEach(id=>{const p=products.find(p=>p.id==id),q=cart[id];full+=p.price*q;fin+=now(p)*q;
+    t+=`• ${q} x ${p.name} — ${money(now(p)*q)}${p.sale_price?" (oferta)":""}\n`});
+  t+=`\nTotal sin descuento: ${money(full)}\nTotal con descuento: ${money(fin)}\n\nQuiero coordinar: retiro / punto de encuentro / envío.`;
+  window.open("https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(t),"_blank");
+};
+load().then(()=>{if(products){renderMenu();render();renderCart()}});
+</script>
+</body>
+</html>
