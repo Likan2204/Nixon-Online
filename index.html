@@ -6,8 +6,8 @@
 <title>Mi tienda de amigurumis y peluches</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f3f1fb;--card:#fff;--ink:#2a2540;--muted:#6e6a85;--pink:#ff5c8a;--mint:#2fae8c;--sun:#ffd54a;--line:#e2def2}
-@media (prefers-color-scheme:dark){:root{--bg:#1c1930;--card:#27233f;--ink:#f1eefc;--muted:#a9a4c4;--line:#3a3560}}
+:root{--bg:#f3f1fb;--card:#fff;--ink:#2a2540;--muted:#6e6a85;--pink:#ff5c8a;--mint:#2fae8c;--sun:#ffd54a;--line:#e2def2;--gold:#d9a521;--gold-bg:#fff4cf;--gold-ink:#6b4a00}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1930;--card:#27233f;--ink:#f1eefc;--muted:#a9a4c4;--line:#3a3560;--gold:#e8b94a;--gold-bg:#3a3050;--gold-ink:#ffd978}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Fredoka,system-ui,sans-serif;line-height:1.45}
 button{font:inherit;cursor:pointer;border:0;color:inherit}
@@ -33,7 +33,7 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 .price{font-size:1.1rem;font-weight:600}
 .price s{color:var(--muted);font-weight:400;font-size:.85rem;margin-right:5px}
 .price b{color:var(--pink)}
-.promo{font-size:.8rem;font-weight:600;color:var(--ink);background:var(--sun);border-radius:8px;padding:1px 8px;align-self:flex-start;margin:2px 0}
+.promo{font-size:.82rem;font-weight:600;color:var(--gold-ink);background:var(--gold-bg);border:1.5px solid var(--gold);border-radius:8px;padding:1px 8px;align-self:flex-start;margin:2px 0}
 .stock{font-size:.8rem;color:var(--mint)}
 .stock.low{color:#d9822b}
 .add{margin-top:6px;background:var(--pink);color:#fff;padding:9px;border-radius:12px;font-weight:500}
