@@ -6,8 +6,8 @@
 <title>Nixon Online - Amigurumis y más 🦔✨</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#d9c9f8;--card:#f0e8ff;--panel:#e7dcfd;--chip:#f6f1ff;--ink:#2a1b5c;--muted:#5f4e96;--pink:#ff5c8a;--mint:#1f9c7b;--sun:#ffd54a;--line:#b7a0ef;--head:#6240d0;--head-ink:#fff;--gold:#d9a521;--gold-bg:#fff4cf;--gold-ink:#6b4a00}
-@media (prefers-color-scheme:dark){:root{--bg:#1c1930;--card:#27233f;--panel:#27233f;--chip:transparent;--ink:#f1eefc;--muted:#a9a4c4;--line:#3a3560;--head:#1c1930;--head-ink:#f1eefc;--gold:#e8b94a;--gold-bg:#3a3050;--gold-ink:#ffd978}}
+:root{--bg:#d9c9f8;--card:#e7dcfd;--panel:#e7dcfd;--ink:#2a1b5c;--muted:#5f4e96;--pink:#ff5c8a;--mint:#1f9c7b;--sun:#ffd54a;--line:#b7a0ef;--head:#6240d0;--head-ink:#fff;--gold:#d9a521;--gold-bg:#fff4cf;--gold-ink:#6b4a00}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1930;--card:#27233f;--panel:#27233f;--ink:#f1eefc;--muted:#a9a4c4;--line:#3a3560;--head:#1c1930;--head-ink:#f1eefc;--gold:#e8b94a;--gold-bg:#3a3050;--gold-ink:#ffd978}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Fredoka,system-ui,sans-serif;line-height:1.45}
 button{font:inherit;cursor:pointer;border:0;color:inherit}
@@ -45,10 +45,9 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 .veil{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:5;display:none}
 .veil.on{display:block}
 .drawer h2{margin:0}
-.cbtn{display:block;width:100%;text-align:left;background:var(--chip);padding:11px 14px;font-weight:500;border:2px solid var(--line);border-radius:12px;margin-top:6px}
-.sbtn{display:block;width:calc(100% - 18px);margin:4px 0 0 18px;text-align:left;background:var(--chip);padding:9px 14px;color:var(--muted);border:2px solid var(--line);border-radius:12px}
-.cbtn.on,.sbtn.on{color:var(--pink);border-color:var(--pink)}
-@media (prefers-color-scheme:dark){.cbtn,.sbtn{background:none;border:0;border-radius:0}.cbtn{border-bottom:1px solid var(--line);margin:0;padding:10px 4px}.sbtn{width:100%;margin:0;padding:7px 4px 7px 18px}}
+.cbtn{display:block;width:100%;text-align:left;background:none;padding:10px 4px;font-weight:500;border-bottom:1px solid var(--line)}
+.sbtn{display:block;width:100%;text-align:left;background:none;padding:7px 4px 7px 18px;color:var(--muted)}
+.cbtn.on,.sbtn.on{color:var(--pink)}
 #items{flex:1}
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
 .row small{color:var(--muted)}
