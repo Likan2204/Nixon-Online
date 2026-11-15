@@ -64,6 +64,9 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 .qty button{background:var(--line);width:28px;height:28px;border-radius:50%}
 .tot{border-top:2px solid var(--line);padding-top:8px}
 .tot div{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.cashbox{display:flex;gap:10px;align-items:flex-start;background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px;cursor:pointer}
+.cashbox input{width:20px;height:20px;accent-color:var(--mint);margin-top:2px;flex:none}
+.cashbox small{display:block;color:var(--muted);font-size:.78rem;margin-top:2px}
 .tot s{color:var(--muted)}
 .tot .final{font-size:1.4rem;font-weight:600;color:var(--pink)}
 .save{color:var(--mint);font-size:.9rem}
@@ -95,10 +98,15 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 <aside class="drawer" id="cart" aria-label="Carrito">
   <h2>Tu pedido</h2>
   <div id="items"></div>
+  <label class="cashbox" id="cashRow" style="display:none">
+    <input type="checkbox" id="cashChk">
+    <span>Voy a pagar en efectivo<small>El precio en efectivo es por cada unidad y no se suma a las promos por cantidad: se aplica el que más te convenga.</small></span>
+  </label>
   <div class="tot">
     <div><span>Total sin descuento</span><s>$<span id="tFull">0</span></s></div>
     <div class="save" id="saveRow"></div>
-    <div><span>Total con descuento</span><span class="final">$<span id="tFinal">0</span></span></div>
+    <div><span id="finalLbl">Total con descuento</span><span class="final">$<span id="tFinal">0</span></span></div>
+    
   </div>
   <p class="note">Retiro: gratis. Punto de encuentro, envío por correo o Uber moto tienen costo extra y lo coordinamos por WhatsApp.</p>
   <button class="buy" id="buy">Enviar pedido por WhatsApp</button>
@@ -127,10 +135,11 @@ const photos = p => [p.image_url, ...(p.images ? p.images.split(",") : [])].map(
 const slides = p => { const f = photos(p); if(!f.length) return "";
   return `<div class="slides">${f.map(u=>`<img loading="lazy" src="${esc(u)}" alt="${esc(p.name)}">`).join("")}</div>`+
   (f.length>1?`<button class="arr l" data-d="-1" aria-label="Foto anterior"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 5l-7 7 7 7"/></svg></button><button class="arr r" data-d="1" aria-label="Foto siguiente"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 5l7 7-7 7"/></svg></button><span class="cnt">1/${f.length}</span>`:""); };
+const cashLine = (p,q) => p.cash_price>0 ? Math.min(line(p,q), q*p.cash_price) : line(p,q);
 const hasPromo = p => p.promo_qty>1 && p.promo_price>0;
 const packs = (p,q) => hasPromo(p) ? Math.floor(q/p.promo_qty) : 0;
 const line = (p,q) => { const k=packs(p,q); return k*p.promo_price + (q-k*(p.promo_qty||0))*now(p); };
-let products=[], cart={}, cat="", sub="";
+let products=[], cart={}, cat="", sub="", useCash=false;
 try{cart=JSON.parse(sessionStorage.getItem("cart")||"{}")}catch(e){}
 
 async function load(){
@@ -176,16 +185,21 @@ function render(){
 
 function renderCart(){
   const ids=Object.keys(cart).filter(id=>products&&products.find(p=>p.id==id));
-  let full=0,fin=0,n=0;
+  let full=0,fin=0,cash=0,n=0;
   $("#items").innerHTML=ids.length?ids.map(id=>{
     const p=products.find(p=>p.id==id),q=cart[id];
-    full+=p.price*q;fin+=line(p,q);n+=q;
+    full+=p.price*q;fin+=line(p,q);cash+=cashLine(p,q);n+=q;
     return `<div class="row"><div>${esc(p.name)}<br><small>${p.sale_price?`<s>${money(p.price)}</s> `:""}${money(now(p))} c/u${packs(p,q)?` · Promo ${p.promo_qty}x${money(p.promo_price)} aplicada`:""}</small>${hasPromo(p)&&q<p.promo_qty&&p.promo_qty<=p.stock?`<br><small class="hint">Sumá ${p.promo_qty-q} más y llevás la promo ${p.promo_qty}x${money(p.promo_price)}</small>`:""}${q>=p.stock?`<br><small class="hint">Máximo disponible</small>`:""}</div>
       <div class="qty"><button data-m="${id}" aria-label="Quitar uno">−</button> ${q} <button data-p="${id}" aria-label="Agregar uno" ${q>=p.stock?"disabled":""}>+</button></div></div>`;
   }).join(""):'<p class="msg">Tu carrito está vacío.</p>';
   $("#tFull").textContent=Math.round(full).toLocaleString("es-AR");
-  $("#tFinal").textContent=Math.round(fin).toLocaleString("es-AR");
-  $("#saveRow").textContent=full>fin?"Ahorrás "+money(full-fin):"";
+  const canCash=cash<fin; if(!canCash)useCash=false;
+  const shown=useCash?cash:fin;
+  $("#cashRow").style.display=canCash?"flex":"none";
+  $("#cashChk").checked=useCash;
+  $("#finalLbl").textContent=useCash?"Total en efectivo":"Total con descuento";
+  $("#tFinal").textContent=Math.round(shown).toLocaleString("es-AR");
+  $("#saveRow").textContent=full>shown?"Ahorrás "+money(full-shown):"";
   $("#count").textContent=n;
   try{sessionStorage.setItem("cart",JSON.stringify(cart))}catch(e){}
 }
@@ -213,15 +227,16 @@ $("#openMenu").onclick=()=>toggle("menu",true);
 $("#openCart").onclick=()=>toggle("cart",true);
 $("#closeCart").onclick=closeAll;
 $("#veil").onclick=closeAll;
+$("#cashChk").onchange=e=>{useCash=e.target.checked;renderCart()};
 $("#q").oninput=render;
 $("#sort").onchange=render;
 $("#buy").onclick=()=>{
   const ids=Object.keys(cart).filter(id=>products.find(p=>p.id==id));
   if(!ids.length)return;
-  let full=0,fin=0,t="¡Hola! Quiero hacer este pedido:\n\n";
-  ids.forEach(id=>{const p=products.find(p=>p.id==id),q=cart[id];full+=p.price*q;fin+=line(p,q);
+  let full=0,fin=0,cash=0,t="¡Hola! Quiero hacer este pedido:\n\n";
+  ids.forEach(id=>{const p=products.find(p=>p.id==id),q=cart[id];full+=p.price*q;fin+=line(p,q);cash+=cashLine(p,q);
     t+=`• ${q} x ${p.name} — ${money(line(p,q))}${packs(p,q)?` (promo ${p.promo_qty}x${money(p.promo_price)})`:p.sale_price?" (oferta)":""}\n`});
-  t+=`\nTotal sin descuento: ${money(full)}\nTotal con descuento: ${money(fin)}\n\nQuiero coordinar: retiro / punto de encuentro / envío.`;
+  t+=`\nTotal sin descuento: ${money(full)}\nTotal con descuento: ${money(fin)}${useCash&&cash<fin?`\nTotal pagando en efectivo: ${money(cash)}`:""}\n\nQuiero coordinar: retiro / punto de encuentro / envío.`;
   window.open("https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(t),"_blank");
 };
 load().then(()=>{if(products){renderMenu();render();renderCart()}});
