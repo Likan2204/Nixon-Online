@@ -6,15 +6,15 @@
 <title>Mi tienda de amigurumis y peluches</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f3f1fb;--card:#fff;--ink:#2a2540;--muted:#6e6a85;--pink:#ff5c8a;--mint:#2fae8c;--sun:#ffd54a;--line:#e2def2;--gold:#d9a521;--gold-bg:#fff4cf;--gold-ink:#6b4a00}
-@media (prefers-color-scheme:dark){:root{--bg:#1c1930;--card:#27233f;--ink:#f1eefc;--muted:#a9a4c4;--line:#3a3560;--gold:#e8b94a;--gold-bg:#3a3050;--gold-ink:#ffd978}}
+:root{--bg:#e6dcfc;--card:#faf7ff;--ink:#2d1f5e;--muted:#6a5a9c;--pink:#ff5c8a;--mint:#1f9c7b;--sun:#ffd54a;--line:#c9b8f3;--head:#6b4bd6;--head-ink:#fff;--gold:#d9a521;--gold-bg:#fff4cf;--gold-ink:#6b4a00}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1930;--card:#27233f;--ink:#f1eefc;--muted:#a9a4c4;--line:#3a3560;--head:#1c1930;--head-ink:#f1eefc;--gold:#e8b94a;--gold-bg:#3a3050;--gold-ink:#ffd978}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:Fredoka,system-ui,sans-serif;line-height:1.45}
 button{font:inherit;cursor:pointer;border:0;color:inherit}
 input,select{font:inherit;color:var(--ink)}
 :focus-visible{outline:3px solid var(--sun);outline-offset:2px}
-header{position:sticky;top:0;z-index:4;background:var(--bg);padding:10px 4vw;display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--line)}
-header h1{margin:0;font-size:1.2rem;font-weight:600;flex:1}
+header{position:sticky;top:0;z-index:4;background:var(--head);padding:10px 4vw;display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--line)}
+header h1{margin:0;font-size:1.2rem;font-weight:600;flex:1;color:var(--head-ink)}
 .ib{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:8px 12px;font-weight:500}
 .cartbtn{background:var(--pink);color:#fff;border-color:var(--pink)}
 .tools{padding:12px 4vw 4px;display:grid;grid-template-columns:1fr auto;gap:8px}
