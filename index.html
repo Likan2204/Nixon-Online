@@ -33,6 +33,7 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 .price{font-size:1.1rem;font-weight:600}
 .price s{color:var(--muted);font-weight:400;font-size:.85rem;margin-right:5px}
 .price b{color:var(--pink)}
+.promo{font-size:.8rem;font-weight:600;color:var(--ink);background:var(--sun);border-radius:8px;padding:1px 8px;align-self:flex-start;margin:2px 0}
 .stock{font-size:.8rem;color:var(--mint)}
 .stock.low{color:#d9822b}
 .add{margin-top:6px;background:var(--pink);color:#fff;padding:9px;border-radius:12px;font-weight:500}
@@ -103,7 +104,7 @@ const WHATSAPP = "5491158824511";
 // ============================
 
 const DEMO = [
- {id:1,name:"Llavero amigurumi pollito",category:"Amigurumis",subcategory:"Llaveros",price:6000,sale_price:null,stock:5},
+ {id:1,name:"Llavero amigurumi pollito",category:"Amigurumis",subcategory:"Llaveros",price:6000,sale_price:null,stock:5,promo_qty:2,promo_price:10000},
  {id:2,name:"Peluche Pikachu 25cm",category:"Peluches",subcategory:"Pokémon",price:18000,sale_price:15000,stock:2},
  {id:3,name:"Llavero goma Hello Kitty",category:"Llaveros",subcategory:"Sanrio",price:3500,sale_price:null,stock:0},
  {id:4,name:"Peluche zorrito",category:"Peluches",subcategory:"Animales",price:14000,sale_price:null,stock:8},
@@ -113,6 +114,9 @@ const $ = s => document.querySelector(s);
 const money = n => "$" + Math.round(n).toLocaleString("es-AR");
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const now = p => p.sale_price ? +p.sale_price : +p.price;
+const hasPromo = p => p.promo_qty>1 && p.promo_price>0;
+const packs = (p,q) => hasPromo(p) ? Math.floor(q/p.promo_qty) : 0;
+const line = (p,q) => { const k=packs(p,q); return k*p.promo_price + (q-k*(p.promo_qty||0))*now(p); };
 let products=[], cart={}, cat="", sub="";
 try{cart=JSON.parse(sessionStorage.getItem("cart")||"{}")}catch(e){}
 
@@ -151,6 +155,7 @@ function render(){
         ${off?`<span class="tag">-${off}%</span>`:""}${out?`<span class="tag out">Agotado</span>`:""}</div>
       <div class="info"><span class="cat">${esc(p.subcategory||p.category)}</span><h3>${esc(p.name)}</h3>
         <div class="price">${p.sale_price?`<s>${money(p.price)}</s><b>${money(p.sale_price)}</b>`:money(p.price)}</div>
+        ${hasPromo(p)?`<span class="promo">Llevando ${p.promo_qty}: ${money(p.promo_price)}</span>`:""}
         <span class="stock ${p.stock<=3?"low":""}">${out?"Sin stock":p.stock<=3?`¡Quedan ${p.stock}!`:`${p.stock} disponibles`}</span>
         <button class="add" data-id="${p.id}" ${out?"disabled":""}>Agregar</button></div></article>`;
   }).join(""):'<p class="msg">No encontramos productos con esos filtros.</p>';
@@ -161,8 +166,8 @@ function renderCart(){
   let full=0,fin=0,n=0;
   $("#items").innerHTML=ids.length?ids.map(id=>{
     const p=products.find(p=>p.id==id),q=cart[id];
-    full+=p.price*q;fin+=now(p)*q;n+=q;
-    return `<div class="row"><div>${esc(p.name)}<br><small>${p.sale_price?`<s>${money(p.price)}</s> `:""}${money(now(p))} c/u</small></div>
+    full+=p.price*q;fin+=line(p,q);n+=q;
+    return `<div class="row"><div>${esc(p.name)}<br><small>${p.sale_price?`<s>${money(p.price)}</s> `:""}${money(now(p))} c/u${packs(p,q)?` · Promo ${p.promo_qty}x${money(p.promo_price)} aplicada`:""}</small></div>
       <div class="qty"><button data-m="${id}" aria-label="Quitar uno">−</button> ${q} <button data-p="${id}" aria-label="Agregar uno">+</button></div></div>`;
   }).join(""):'<p class="msg">Tu carrito está vacío.</p>';
   $("#tFull").textContent=Math.round(full).toLocaleString("es-AR");
@@ -197,8 +202,8 @@ $("#buy").onclick=()=>{
   const ids=Object.keys(cart).filter(id=>products.find(p=>p.id==id));
   if(!ids.length)return;
   let full=0,fin=0,t="¡Hola! Quiero hacer este pedido:\n\n";
-  ids.forEach(id=>{const p=products.find(p=>p.id==id),q=cart[id];full+=p.price*q;fin+=now(p)*q;
-    t+=`• ${q} x ${p.name} — ${money(now(p)*q)}${p.sale_price?" (oferta)":""}\n`});
+  ids.forEach(id=>{const p=products.find(p=>p.id==id),q=cart[id];full+=p.price*q;fin+=line(p,q);
+    t+=`• ${q} x ${p.name} — ${money(line(p,q))}${packs(p,q)?` (promo ${p.promo_qty}x${money(p.promo_price)})`:p.sale_price?" (oferta)":""}\n`});
   t+=`\nTotal sin descuento: ${money(full)}\nTotal con descuento: ${money(fin)}\n\nQuiero coordinar: retiro / punto de encuentro / envío.`;
   window.open("https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(t),"_blank");
 };
