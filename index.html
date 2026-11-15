@@ -52,6 +52,8 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 .row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)}
 .row small{color:var(--muted)}
 .qty{white-space:nowrap}
+.hint{color:var(--mint)!important}
+.qty button:disabled{opacity:.35;cursor:not-allowed}
 .qty button{background:var(--line);width:28px;height:28px;border-radius:50%}
 .tot{border-top:2px solid var(--line);padding-top:8px}
 .tot div{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
@@ -167,8 +169,8 @@ function renderCart(){
   $("#items").innerHTML=ids.length?ids.map(id=>{
     const p=products.find(p=>p.id==id),q=cart[id];
     full+=p.price*q;fin+=line(p,q);n+=q;
-    return `<div class="row"><div>${esc(p.name)}<br><small>${p.sale_price?`<s>${money(p.price)}</s> `:""}${money(now(p))} c/u${packs(p,q)?` · Promo ${p.promo_qty}x${money(p.promo_price)} aplicada`:""}</small></div>
-      <div class="qty"><button data-m="${id}" aria-label="Quitar uno">−</button> ${q} <button data-p="${id}" aria-label="Agregar uno">+</button></div></div>`;
+    return `<div class="row"><div>${esc(p.name)}<br><small>${p.sale_price?`<s>${money(p.price)}</s> `:""}${money(now(p))} c/u${packs(p,q)?` · Promo ${p.promo_qty}x${money(p.promo_price)} aplicada`:""}</small>${hasPromo(p)&&q<p.promo_qty&&p.promo_qty<=p.stock?`<br><small class="hint">Sumá ${p.promo_qty-q} más y llevás la promo ${p.promo_qty}x${money(p.promo_price)}</small>`:""}${q>=p.stock?`<br><small class="hint">Máximo disponible</small>`:""}</div>
+      <div class="qty"><button data-m="${id}" aria-label="Quitar uno">−</button> ${q} <button data-p="${id}" aria-label="Agregar uno" ${q>=p.stock?"disabled":""}>+</button></div></div>`;
   }).join(""):'<p class="msg">Tu carrito está vacío.</p>';
   $("#tFull").textContent=Math.round(full).toLocaleString("es-AR");
   $("#tFinal").textContent=Math.round(fin).toLocaleString("es-AR");
