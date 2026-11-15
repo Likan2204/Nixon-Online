@@ -27,10 +27,11 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 .slides{position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
 .slides::-webkit-scrollbar{display:none}
 .slides img{flex:0 0 100%;width:100%;height:100%;object-fit:contain;scroll-snap-align:center;display:block}
-.arr{position:absolute;top:50%;transform:translateY(-50%);z-index:1;width:30px;height:30px;border-radius:50%;background:rgba(42,27,92,.6);color:#fff;font-size:20px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center}
+.arr{position:absolute;top:50%;transform:translateY(-50%);z-index:1;width:30px;height:30px;border-radius:50%;background:rgba(42,27,92,.6);color:#fff;padding:0;display:flex;align-items:center;justify-content:center}
+.arr svg{pointer-events:none;display:block}
 .arr.l{left:6px}.arr.r{right:6px}
 .cnt{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);z-index:1;background:rgba(42,27,92,.6);color:#fff;font-size:.72rem;padding:0 8px;border-radius:99px}
-.tag{z-index:1;position:absolute;top:8px;left:8px;background:var(--sun);color:#2a2540;font-weight:600;padding:1px 9px;border-radius:99px;font-size:.8rem}
+.tag{z-index:1;position:absolute;top:8px;left:8px;background:var(--gold);color:#2a2540;font-weight:600;padding:1px 9px;border-radius:99px;font-size:.8rem}
 .tag.out{background:var(--ink);color:var(--bg);left:auto;right:8px}
 .info{padding:10px;display:flex;flex-direction:column;gap:2px;flex:1}
 .info h3{margin:0;font-size:.95rem;font-weight:500}
@@ -39,9 +40,9 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 .price s{color:var(--muted);font-weight:400;font-size:.85rem;margin-right:5px}
 .price b{color:var(--pink)}
 .promo{font-size:.82rem;font-weight:600;color:var(--gold-ink);background:var(--gold-bg);border:1.5px solid var(--gold);border-radius:8px;padding:1px 8px;align-self:flex-start;margin:2px 0}
-.stock{font-size:.8rem;color:var(--mint)}
+.stock{margin-bottom:8px;font-size:.8rem;color:var(--mint)}
 .stock.low{color:#d9822b}
-.add{margin-top:6px;background:var(--pink);color:#fff;padding:9px;border-radius:12px;font-weight:500}
+.add{margin-top:auto;background:var(--pink);color:#fff;padding:9px;border-radius:12px;font-weight:500}
 .add:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
 .drawer{position:fixed;top:0;height:100%;width:min(360px,92%);background:var(--panel);z-index:6;padding:18px;display:flex;flex-direction:column;gap:10px;transition:transform .25s;overflow:auto}
 #menu{left:0;transform:translateX(-105%);box-shadow:8px 0 30px rgba(0,0,0,.25)}
@@ -124,7 +125,7 @@ const now = p => p.sale_price ? +p.sale_price : +p.price;
 const photos = p => [p.image_url, ...(p.images ? p.images.split(",") : [])].map(x => x && x.trim()).filter(Boolean);
 const slides = p => { const f = photos(p); if(!f.length) return "";
   return `<div class="slides">${f.map(u=>`<img loading="lazy" src="${esc(u)}" alt="${esc(p.name)}">`).join("")}</div>`+
-  (f.length>1?`<button class="arr l" data-d="-1" aria-label="Foto anterior">‹</button><button class="arr r" data-d="1" aria-label="Foto siguiente">›</button><span class="cnt">1/${f.length}</span>`:""); };
+  (f.length>1?`<button class="arr l" data-d="-1" aria-label="Foto anterior"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 5l-7 7 7 7"/></svg></button><button class="arr r" data-d="1" aria-label="Foto siguiente"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 5l7 7-7 7"/></svg></button><span class="cnt">1/${f.length}</span>`:""); };
 const hasPromo = p => p.promo_qty>1 && p.promo_price>0;
 const packs = (p,q) => hasPromo(p) ? Math.floor(q/p.promo_qty) : 0;
 const line = (p,q) => { const k=packs(p,q); return k*p.promo_price + (q-k*(p.promo_qty||0))*now(p); };
