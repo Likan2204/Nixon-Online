@@ -41,7 +41,7 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 .drawer{position:fixed;top:0;height:100%;width:min(360px,92%);background:var(--card);z-index:6;padding:18px;display:flex;flex-direction:column;gap:10px;transition:transform .25s;overflow:auto}
 #menu{left:0;transform:translateX(-105%);box-shadow:8px 0 30px rgba(0,0,0,.25)}
 #cart{right:0;transform:translateX(105%);box-shadow:-8px 0 30px rgba(0,0,0,.25)}
-.drawer.open{transform:none}
+#menu.open,#cart.open{transform:none}
 .veil{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:5;display:none}
 .veil.on{display:block}
 .drawer h2{margin:0}
