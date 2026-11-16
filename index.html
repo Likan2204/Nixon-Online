@@ -21,7 +21,7 @@ header h1{margin:0;font-size:1.2rem;font-weight:600;flex:1;color:var(--head-ink)
 .tools{padding:12px 4vw 4px;display:grid;grid-template-columns:1fr auto;gap:8px}
 .tools input,.tools select{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:9px 12px;min-width:0}
 .crumb{padding:6px 4vw;color:var(--muted);font-size:.9rem}
-main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+main{padding:8px 4vw 20px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media(min-width:640px){main{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}}
 .card{background:var(--card);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;border:2px solid var(--line)}
 .ph{position:relative;aspect-ratio:3/4;background:#f1f1f3}
@@ -72,6 +72,15 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 .save{color:var(--mint);font-size:.9rem}
 .note{font-size:.82rem;color:var(--muted);background:var(--bg);padding:8px 10px;border-radius:10px}
 .buy{background:var(--mint);color:#fff;padding:13px;border-radius:14px;font-weight:600}
+.foot{margin:0 4vw 40px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px 16px;text-align:center}
+.how{margin-bottom:14px;text-align:left}
+.how ol{margin:8px 0 0;padding-left:20px}
+.how ul{margin:6px 0 0;padding-left:20px}
+.how li{margin:6px 0;color:var(--muted);font-size:.92rem}
+.how li b{display:inline;font-size:inherit;margin:0;color:var(--ink)}
+.foot b{display:block;font-weight:600;font-size:1.05rem;margin-bottom:6px}
+.foot p{margin:0 0 12px;color:var(--muted);font-size:.9rem}
+.foot a{display:inline-block;background:var(--mint);color:#fff;text-decoration:none;font-weight:500;padding:10px 18px;border-radius:12px}
 .msg{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0}
 @media (prefers-reduced-motion:reduce){.drawer{transition:none}}
 </style>
@@ -92,6 +101,28 @@ main{padding:8px 4vw 60px;display:grid;grid-template-columns:repeat(2,1fr);gap:1
 </div>
 <div class="crumb" id="crumb"></div>
 <main id="grid"><p class="msg">Cargando productos…</p></main>
+
+<section class="foot how" id="how">
+  <b>Cómo comprar 🛒</b>
+  <ol>
+    <li><b>Elegí</b> lo que te guste y tocá "Agregar".</li>
+    <li><b>Revisá tu carrito</b>: ahí ves el total y las promos. Si vas a pagar en efectivo, tildá la casilla.</li>
+    <li><b>Tocá "Enviar pedido por WhatsApp"</b> y se arma el mensaje con tu pedido. Suelo responder en menos de 30 minutos.</li>
+    <li><b>Lo coordinamos juntos</b>: elegimos si retirás, nos encontramos o te lo envío (los detalles están acá abajo).</li>
+  </ol>
+  <b style="margin-top:14px">Retiros y entregas 📦</b>
+  <ul>
+    <li><b>Retiro (gratis):</b> lunes a viernes de 10 a 13 y de 16 a 19 hs, y sábados de 10 a 14 hs. La dirección te la paso por WhatsApp cuando confirmamos el pedido.</li>
+    <li><b>Punto de encuentro:</b> lunes y jueves de 14 a 16 hs, según la zona. Tiene un costo de viático y lo coordinamos por WhatsApp.</li>
+    <li><b>Envíos:</b> por correo o Uber moto, con el costo a cargo de quien compra. También lo coordinamos por WhatsApp.</li>
+  </ul>
+</section>
+
+<footer class="foot">
+  <b>¿No ves lo que buscás? ✨</b>
+  <p>Atiendo la tienda yo solo. Voy sumando modelos nuevos según la demanda. Si querés un personaje o modelo que no está (por ejemplo, un Pokémon puntual), consultame por pedidos especiales y, si lo puedo conseguir, te aviso.</p>
+  <a id="askWa" href="#" target="_blank" rel="noopener">Consultar pedido especial</a>
+</footer>
 
 <div class="veil" id="veil"></div>
 <nav class="drawer" id="menu" aria-label="Categorías"></nav>
@@ -160,6 +191,7 @@ function renderMenu(){
     h+=`<button class="cbtn ${cat===c&&!sub?'on':''}" data-c="${esc(c)}">${esc(c)}</button>`;
     [...tree[c]].forEach(s=>h+=`<button class="sbtn ${cat===c&&sub===s?'on':''}" data-c="${esc(c)}" data-s="${esc(s)}">${esc(s)}</button>`);
   });
+  h+='<button class="cbtn" data-how="1" style="margin-top:14px">🛒 Cómo comprar</button>';
   $("#menu").innerHTML=h;
 }
 
@@ -215,6 +247,7 @@ const closeAll=()=>{["menu","cart"].forEach(i=>$("#"+i).classList.remove("open")
 document.addEventListener("click",e=>{
   const t=e.target;
   if(t.dataset.c!==undefined&&t.closest("#menu")){cat=t.dataset.c;sub=t.dataset.s||"";renderMenu();render();closeAll()}
+  if(t.dataset.how!==undefined){closeAll();setTimeout(()=>$("#how").scrollIntoView({behavior:"smooth"}),60)}
   if(t.classList.contains("add")){change(t.dataset.id,1);toggle("cart",true)}
   if(t.dataset.d){const sl=t.closest(".ph").querySelector(".slides");sl.scrollBy({left:sl.clientWidth*t.dataset.d,behavior:"smooth"})}
   if(t.dataset.p)change(t.dataset.p,1);
@@ -228,6 +261,7 @@ $("#openCart").onclick=()=>toggle("cart",true);
 $("#closeCart").onclick=closeAll;
 $("#veil").onclick=closeAll;
 $("#cashChk").onchange=e=>{useCash=e.target.checked;renderCart()};
+$("#askWa").href="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent("¡Hola! Quería consultar por un pedido especial: ");
 $("#q").oninput=render;
 $("#sort").onchange=render;
 $("#buy").onclick=()=>{
