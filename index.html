@@ -167,9 +167,23 @@ const slides = p => { const f = photos(p); if(!f.length) return "";
   return `<div class="slides">${f.map(u=>`<img loading="lazy" src="${esc(u)}" alt="${esc(p.name)}">`).join("")}</div>`+
   (f.length>1?`<button class="arr l" data-d="-1" aria-label="Foto anterior"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.5 5l-7 7 7 7"/></svg></button><button class="arr r" data-d="1" aria-label="Foto siguiente"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 5l7 7-7 7"/></svg></button><span class="cnt">1/${f.length}</span>`:""); };
 const cashLine = (p,q) => p.cash_price>0 ? Math.min(line(p,q), q*p.cash_price) : line(p,q);
-const hasPromo = p => p.promo_qty>1 && p.promo_price>0;
-const packs = (p,q) => hasPromo(p) ? Math.floor(q/p.promo_qty) : 0;
-const line = (p,q) => { const k=packs(p,q); return k*p.promo_price + (q-k*(p.promo_qty||0))*now(p); };
+const promoList = p => { const L=[];
+  if(p.promos) String(p.promos).split(",").forEach(x=>{const [n,c]=x.split(":").map(Number); if(n>1&&c>0) L.push([n,c])});
+  if(p.promo_qty>1&&p.promo_price>0) L.push([+p.promo_qty,+p.promo_price]);
+  return L.sort((a,b)=>a[0]-b[0]); };
+const best = (p,q) => { const u=now(p), L=promoList(p), c=[0], from=[null];
+  for(let k=1;k<=q;k++){ c[k]=c[k-1]+u; from[k]=null;
+    for(const [n,pr] of L){ if(n<=k && c[k-n]+pr<c[k]){ c[k]=c[k-n]+pr; from[k]=[n,pr]; } } }
+  const used={}; let k=q;
+  while(k>0){ if(from[k]){ const key=from[k][0]+"x"+from[k][1]; used[key]=(used[key]||0)+1; k-=from[k][0]; } else k--; }
+  return {total:c[q], used}; };
+const line = (p,q) => best(p,q).total;
+const promoShort = (p,q) => Object.entries(best(p,q).used).map(([k,c])=>{const [n,pr]=k.split("x");return (c>1?c+"×":"")+n+"x"+money(+pr)}).join(" + ");
+const nextPromo = (p,q) => { const cur = q>0 ? best(p,q).total/q : now(p);
+  return promoList(p).find(([n,pr])=>n>q && n<=p.stock && pr/n<cur); };
+const promoChip = p => { const L=promoList(p); if(!L.length) return ""; const [n,c]=L[0];
+  return `<span class="promo">${L.length>1?`${n} x ${money(c)} y más`:`Llevando ${n}: ${money(c)}`}</span>`; };
+
 let products=[], cart={}, cat="", sub="", useCash=false;
 try{cart=JSON.parse(sessionStorage.getItem("cart")||"{}")}catch(e){}
 
@@ -209,7 +223,7 @@ function render(){
         ${off?`<span class="tag">-${off}%</span>`:""}${out?`<span class="tag out">Agotado</span>`:""}</div>
       <div class="info"><span class="cat">${esc(p.subcategory||p.category)}</span><h3>${esc(p.name)}</h3>
         <div class="price">${p.sale_price?`<s>${money(p.price)}</s><b>${money(p.sale_price)}</b>`:money(p.price)}</div>
-        ${hasPromo(p)?`<span class="promo">Llevando ${p.promo_qty}: ${money(p.promo_price)}</span>`:""}
+        ${promoChip(p)}
         <span class="stock ${p.stock<=3?"low":""}">${out?"Sin stock":p.stock<=3?(p.stock===1?"¡Queda 1!":`¡Quedan ${p.stock}!`):`${p.stock} disponibles`}</span>
         <button class="add" data-id="${p.id}" ${out?"disabled":""}>Agregar</button></div></article>`;
   }).join(""):'<p class="msg">No encontramos productos con esos filtros.</p>';
@@ -221,7 +235,7 @@ function renderCart(){
   $("#items").innerHTML=ids.length?ids.map(id=>{
     const p=products.find(p=>p.id==id),q=cart[id];
     full+=p.price*q;fin+=line(p,q);cash+=cashLine(p,q);n+=q;
-    return `<div class="row"><div>${esc(p.name)}<br><small>${p.sale_price?`<s>${money(p.price)}</s> `:""}${money(now(p))} c/u${packs(p,q)?` · Promo ${p.promo_qty}x${money(p.promo_price)} aplicada`:""}</small>${hasPromo(p)&&q<p.promo_qty&&p.promo_qty<=p.stock?`<br><small class="hint">Sumá ${p.promo_qty-q} más y llevás la promo ${p.promo_qty}x${money(p.promo_price)}</small>`:""}${q>=p.stock?`<br><small class="hint">Máximo disponible</small>`:""}</div>
+    return `<div class="row"><div>${esc(p.name)}<br><small>${p.sale_price?`<s>${money(p.price)}</s> `:""}${money(now(p))} c/u${promoShort(p,q)?` · Promo ${promoShort(p,q)} aplicada`:""}</small>${nextPromo(p,q)?`<br><small class="hint">Sumá ${nextPromo(p,q)[0]-q} más y llevás la promo ${nextPromo(p,q)[0]}x${money(nextPromo(p,q)[1])}</small>`:""}${q>=p.stock?`<br><small class="hint">Máximo disponible</small>`:""}</div>
       <div class="qty"><button data-m="${id}" aria-label="Quitar uno">−</button> ${q} <button data-p="${id}" aria-label="Agregar uno" ${q>=p.stock?"disabled":""}>+</button></div></div>`;
   }).join(""):'<p class="msg">Tu carrito está vacío.</p>';
   $("#tFull").textContent=Math.round(full).toLocaleString("es-AR");
@@ -269,7 +283,7 @@ $("#buy").onclick=()=>{
   if(!ids.length)return;
   let full=0,fin=0,cash=0,t="¡Hola! Quiero hacer este pedido:\n\n";
   ids.forEach(id=>{const p=products.find(p=>p.id==id),q=cart[id];full+=p.price*q;fin+=line(p,q);cash+=cashLine(p,q);
-    t+=`• ${q} x ${p.name} — ${money(line(p,q))}${packs(p,q)?` (promo ${p.promo_qty}x${money(p.promo_price)})`:p.sale_price?" (oferta)":""}\n`});
+    t+=`• ${q} x ${p.name} — ${money(line(p,q))}${promoShort(p,q)?` (promo ${promoShort(p,q)})`:p.sale_price?" (oferta)":""}\n`});
   t+=`\nTotal sin descuento: ${money(full)}\nTotal con descuento: ${money(fin)}${useCash&&cash<fin?`\nTotal pagando en efectivo: ${money(cash)}`:""}\n\nQuiero coordinar: retiro / punto de encuentro / envío.`;
   window.open("https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(t),"_blank");
 };
