@@ -224,7 +224,7 @@ function render(){
       <div class="info"><span class="cat">${esc(p.subcategory||p.category)}</span><h3>${esc(p.name)}</h3>
         <div class="price">${p.sale_price?`<s>${money(p.price)}</s><b>${money(p.sale_price)}</b>`:money(p.price)}</div>
         ${promoChip(p)}
-        <span class="stock ${p.stock<=3?"low":""}">${out?"Sin stock":p.stock<=3?(p.stock===1?"¡Queda 1!":`¡Quedan ${p.stock}!`):`${p.stock} disponibles`}</span>
+        <span class="stock ${p.stock<=3?"low":""}">${out?"Sin stock":p.stock<=3?(p.stock===1?"¡Queda 1!":`¡Quedan ${p.stock}!`):(p.stock>=50?"Disponible":`${p.stock} disponibles`)}</span>
         <button class="add" data-id="${p.id}" ${out?"disabled":""}>Agregar</button></div></article>`;
   }).join(""):'<p class="msg">No encontramos productos con esos filtros.</p>';
 }
